@@ -54,12 +54,12 @@ def get_vars(in_file):
     return var_list
 
 
-def render_scripts(in_username, in_password, in_variable_dict, in_template, in_target_folder='scripts'):
+def render_scripts(in_username, in_password, in_filter_file, in_variable_dict, in_template, in_target_folder='scripts'):
     """
     creates the scripts with jinja, creates the 'in_target_folder(default='scripts')' if it does not already exists.
     the scripts name is built from the variables.
     """
-    data = in_template.render(user_name=in_username, password=in_password, **in_variable_dict)
+    data = in_template.render(user_name=in_username, password=in_password, filter_list_path=in_filter_file, **in_variable_dict)
     folder = os.path.join(_cwd, in_target_folder)
     script_name = f"{in_variable_dict['server']}_{in_variable_dict['category']}_script.py"
     if os.path.exists(folder) is False:
@@ -70,16 +70,17 @@ def render_scripts(in_username, in_password, in_variable_dict, in_template, in_t
 
 def main():
     # get username and password
-    # if you don't want to have to manually input your password, then comment out the original line and comment in the following line:
+    # if you don't want to have to manually input your password, then comment out the original line(76) and comment in the following line(75):
 
     # username, password = (YOURUSERNAME, YOURPASSWORD)
     username, password = get_username_password()
     # get the template from the template file
     template = get_template()
+    filter_list_path = ''
     # loop through the list of variable dictionaries from the csv
     # and create the scripts
     for var_group in get_vars('Mappe1.csv'):
-        render_scripts(username, password, var_group, template)
+        render_scripts(username, password, filter_list_path var_group, template)
 
 
 # execute the main function
