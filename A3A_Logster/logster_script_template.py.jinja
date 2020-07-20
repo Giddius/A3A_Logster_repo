@@ -17,7 +17,8 @@ def get_filters():
     each line is a different filter string.
     """
     with open({{ filter_list_path }}, 'r') as filter_file:
-        return filter_file.read().splitlines()
+        _out = filter_file.read().splitlines()
+    return _out
 
 def filter_file(inputPathObj, outputPathObj):
     """
