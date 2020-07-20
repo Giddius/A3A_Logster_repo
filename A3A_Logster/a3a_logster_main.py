@@ -70,7 +70,7 @@ def render_scripts(in_username, in_password, in_filter_file, in_variable_dict, i
 
 def main():
     # get username and password
-    # if you don't want to have to manually input your password, then comment out the original line(76) and comment in the following line(75):
+    # if you don't want to have to manually input your password, then comment out the original line(76) and the import line(5) and comment in the following line(75):
 
     # username, password = (YOURUSERNAME, YOURPASSWORD)
     username, password = get_username_password()
