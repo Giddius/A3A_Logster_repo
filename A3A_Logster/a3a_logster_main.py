@@ -48,8 +48,8 @@ def get_vars(in_file):
             _var_dict['ftp_var'] = Folder.strip()
             _var_dict['server'] = Server.strip().replace(' ', '_')
             _var_dict['category'] = Category.strip().replace(' ', '')
-            _var_dict['folder'] = Full_log.replace('\\', ' /').strip().replace(' ', '_')
-            _var_dict['filtered_folder'] = Filtered_Log.replace('\\', '/').strip().replace(' ', '_')
+            _var_dict['folder'] = Full_log.replace('\\', ' /').replace(' ', '_')
+            _var_dict['filtered_folders'] = Filtered_Log.replace('\\', '/').strip().replace(' ', '_')
 
             var_list.append(_var_dict)
     return var_list
