@@ -20,6 +20,9 @@ def get_filters():
         return filter_file.read().splitlines()
 
 def filter_file(inputPathObj, outputPathObj):
+    """
+    filters out all lines that contain a string from the filter_list.txt file
+    """
     with inputPathObj.open("r", encoding='utf-8', errors='ignore') as input_file:
         with outputPathObj.open("w", encoding='utf-8', errors='ignore') as output_file:
             new_f = input_file.readlines()
