@@ -80,7 +80,7 @@ def main():
     # loop through the list of variable dictionaries from the csv
     # and create the scripts
     for var_group in get_vars('Mappe1.csv'):
-        render_scripts(username, password, filter_list_path var_group, template)
+        render_scripts(username, password, filter_list_path, var_group, template)
 
 
 # execute the main function
