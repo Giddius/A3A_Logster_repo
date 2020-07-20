@@ -16,7 +16,7 @@ def get_filters():
     from the file 'filter_list.txt' inside the current folder
     each line is a different filter string.
     """
-    with open('filter_list.txt', 'r') as filter_file:
+    with open({{ filter_list_path }}, 'r') as filter_file:
         return filter_file.read().splitlines()
 
 def filter_file(inputPathObj, outputPathObj):
@@ -27,7 +27,7 @@ def filter_file(inputPathObj, outputPathObj):
         with outputPathObj.open("w", encoding='utf-8', errors='ignore') as output_file:
             new_f = input_file.readlines()
             for line in new_f:
-                if not any(filter in line for filter in get_filters())
+                if any(filter not in line for filter in get_filters())
                     output_file.write(line)
             output_file.truncate()
 
