@@ -70,6 +70,9 @@ def render_scripts(in_username, in_password, in_variable_dict, in_template, in_t
 
 def main():
     # get username and password
+    # if you don't want to have to manually input your password, then comment out the original line and comment in the following line:
+
+    # username, password = (YOURUSERNAME, YOURPASSWORD)
     username, password = get_username_password()
     # get the template from the template file
     template = get_template()
