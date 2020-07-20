@@ -2,21 +2,21 @@ import os
 import jinja2
 from jinja2 import Environment
 # needs to be installed!
-import stdiomask
+# import stdiomask
 
 
 _cwd = os.getcwd()
 
 
-def get_username_password():
-    """
-    gets username and password from user input,
-    password is obscured by '*' via the stdiomask module
-    Returns a tuple where [0] = user_name and [1] is password
-    """
-    user_name = input("Please enter your Username: ")
-    password = stdiomask.getpass("Please enter your Password: ")
-    return (user_name, password)
+# def get_username_password():
+#     """
+#     gets username and password from user input,
+#     password is obscured by '*' via the stdiomask module
+#     Returns a tuple where [0] = user_name and [1] is password
+#     """
+#     user_name = input("Please enter your Username: ")
+#     password = stdiomask.getpass("Please enter your Password: ")
+#     return (user_name, password)
 
 
 def get_template(in_template='logster_script_template.py.jinja'):
@@ -38,6 +38,7 @@ def get_vars(in_file):
     var_list = []
     with open(os.path.join(_cwd, in_file), 'r') as csvfile:
         _csv_list = csvfile.read().splitlines(False)
+        print(_csv_list)
 
     for index, line in enumerate(_csv_list):
         if index != 0:
@@ -72,8 +73,8 @@ def main():
     # get username and password
     # if you don't want to have to manually input your password, then comment out the original line(76) and the import line(5) and comment in the following line(75):
 
-    # username, password = (YOURUSERNAME, YOURPASSWORD)
-    username, password = get_username_password()
+    username, password = ('YOURUSERNAME', 'YOURPASSWORD')
+    # username, password = get_username_password()
     # get the template from the template file
     template = get_template()
     filter_list_path = ''

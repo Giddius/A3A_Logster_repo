@@ -3,35 +3,35 @@ import pathlib
 import os
 
 
-USERNAME = "test_user"
-PASSWORD = "test_pass"
+USERNAME = "YOURUSERNAME"
+PASSWORD = "YOURPASSWORD"
 TARGET_SERVER = "antistasi.armahosts.com_2332"
-LOCAL_LOG_DIR = pathlib.Path("/www/htdocs/w0170fba/antistasi.de/dev_drive/Bob_Murphy/Full_Logs")
-LOCAL_FILTERED_LOGS_DIR = pathlib.Path("/www/htdocs/w0170fba/antistasi.de/dev_drive/Bob_Murphy/Antistasi_Community_Logs")
+LOCAL_LOG_DIR = pathlib.Path("SOMEPATH")
+LOCAL_FILTERED_LOGS_DIR = pathlib.Path("SOMEPATH")
 
+
+def get_filters():
+    """
+    gets a list of strings to filter the logs with.
+    from the file 'filter_list.txt' inside the current folder
+    each line is a different filter string.
+    """
+    with open('filter_list.txt', 'r') as filter_file:
+        return filter_file.read().splitlines()
 
 def filter_file(inputPathObj, outputPathObj):
+    """
+    filters out all lines that contain a string from the filter_list.txt file
+    """
     with inputPathObj.open("r", encoding='utf-8', errors='ignore') as input_file:
         with outputPathObj.open("w", encoding='utf-8', errors='ignore') as output_file:
             new_f = input_file.readlines()
             for line in new_f:
-                if "Server: Object" not in line:
-                    if "Server: Network message" not in line:
-                        if "Client: Object" not in line:
-                            if "Error: Object" not in line:
-                                if "Setting invalid pitch" not in line:
-                                    if "Client: Remote object" not in line:
-                                        if "Error in expression <];testArray = testArray + [1];testArray set [_a, 1];testArray pushBack 1;}, 0, 1>" not in line:
-                                            if "Error position: <set [_a, 1];testArray pushBack 1;}, 0, 1>" not in line:
-                                                if "Error Type Any, expected Number" not in line:
-                                                    if "Ref to nonnetwork object" not in line:
-                                                        if "Message not sent - error 0, message ID" not in line:
-                                                            if "NetServer: cannot find channel #" not in line:
-                                                                if "NetServer: trying to send a too large non-guaranteed message" not in line:
-                                                                    output_file.write(line)
+                if not any(filter in line for filter in get_filters())
+                    output_file.write(line)
             output_file.truncate()
 
-^
+
 download_single_server = TARGET_SERVER != ""
 
 ftp = FTP()
@@ -46,7 +46,7 @@ print(servers)
 for server in servers:
     print("Downloading files from server {}".format(server))
 
-    rptDir = LOCAL_LOG_DIR.joinpath('')
+    rptDir = LOCAL_LOG_DIR.joinpath('Eventserver/Server')
     rptDir.mkdir(parents=True, exist_ok=True)
     print(str(rptDir) + ' save location for full logs')
 
@@ -72,7 +72,7 @@ for server in servers:
             ftp.retrbinary("RETR {}".format(file_name), fp.write)
 
         print("Filtering {}".format(file_name))
-        filteredRptPath = filteredRptDir.joinpath(file_name)
+        filteredRptPath = filteredRptDir.joinpath(file_name + '.txt')
         filter_file(rptPath, filteredRptPath)
 
 
