@@ -69,7 +69,7 @@ for server in servers:
             ftp.retrbinary("RETR {}".format(file_name), fp.write)
 
         print("Filtering {}".format(file_name))
-        filteredRptPath = filteredRptDir.joinpath(file_name)
+        filteredRptPath = filteredRptDir.joinpath(file_name + '.txt')
         filter_file(rptPath, filteredRptPath)
 
 
