@@ -37,11 +37,10 @@ def get_vars(in_file):
     """
     var_list = []
     with open(os.path.join(_cwd, in_file), 'r') as csvfile:
-        _csv_list = csvfile.read().splitlines(False)
-        print(_csv_list)
+        _csv_list = csvfile.read().splitlines()
 
     for index, line in enumerate(_csv_list):
-        if index != 0:
+        if index != 0 and line != '':
             _var_dict = {}
             Server, Category, TARGET_SERVER, Folder, Full_log, Filtered_Log = line.split(';')
             _var_dict['target_server'] = TARGET_SERVER.strip()
