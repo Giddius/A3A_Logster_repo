@@ -9,7 +9,7 @@ None
 import os
 
 
-_cwd = os.getcwd()
+_cwd = r"D:\Dropbox\hobby\Modding\Programs\Github\My_Repos\A3A_Logster_repo\A3A_Logster".replace('\\', '/')
 
 
 # -------------------------------------------------------------- file_walker -------------------------------------------------------------- #
@@ -39,5 +39,9 @@ def file_walker(in_path):
 
 
 for files in file_walker(_cwd):
-    if '.rpt' in files:
+
+    if 'Antistasi_Community_Logs'.lower() in files.lower() and os.path.splitext(files)[1] == '.rpt':
+        if os.path.exists(files + '.txt') is True:
+            os.remove(files + '.txt')
+            print(f"deleted and overwriting [{files}]")
         os.rename(files, files + '.txt')

@@ -16,7 +16,7 @@ def get_filters():
     from the file 'filter_list.txt' inside the current folder
     each line is a different filter string.
     """
-    with open({{ filter_list_path }}, 'r') as filter_file:
+    with open('{{ filter_list_path }}', 'r') as filter_file:
         _out = filter_file.read().splitlines()
     return _out
 
