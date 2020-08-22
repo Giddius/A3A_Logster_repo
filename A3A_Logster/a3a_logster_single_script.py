@@ -6,6 +6,11 @@ import os
 
 # endregion [Imports]
 
+# region [Support_Objects]
+
+
+# endregion [Support_Objects]
+
 # region [Constants]
 
 USERNAME = "{{ user_name }}"
@@ -18,6 +23,7 @@ LOCAL_FILTERED_LOGS_DIR = pathlib.Path("SOMEPATH")
 
 # region [Global_Functions]
 
+
 def get_filters():
     """
     gets a list of strings to filter the logs with.
@@ -27,6 +33,7 @@ def get_filters():
     with open('{{ filter_list_path }}', 'r') as filter_file:
         _out = filter_file.read().splitlines()
     return _out
+
 
 def filter_file(inputPathObj, outputPathObj):
     """
@@ -41,6 +48,7 @@ def filter_file(inputPathObj, outputPathObj):
             output_file.truncate()
 
 # endregion [Global_Functions]
+
 
 download_single_server = TARGET_SERVER != ""
 
@@ -59,7 +67,6 @@ for server in servers:
     rptDir = LOCAL_LOG_DIR.joinpath('{{ folder }}')
     rptDir.mkdir(parents=True, exist_ok=True)
     print(str(rptDir) + ' save location for full logs')
-
 
     filteredRptDir = LOCAL_FILTERED_LOGS_DIR.joinpath('{{ filtered_folders }}')
     filteredRptDir.mkdir(parents=True, exist_ok=True)
@@ -88,5 +95,10 @@ for server in servers:
 
 print("logs downloaded")
 
+# region [Main_Exec]
+
 if __name__ == '__main__':
     pass
+
+
+# endregion [Main_Exec]
