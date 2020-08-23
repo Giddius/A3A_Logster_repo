@@ -106,7 +106,7 @@ class LogDownloader:
     def filter_logs(self):
         pylog.info('Class: %s, Name: %s -- starting process of filtering new logs', self.__class__, self.name)
         for filename, filepath in self.new_logs:
-            _filtered_path = os.path.join(self.filtered_log_folder, filename)
+            _filtered_path = os.path.join(self.filtered_log_folder, filename.split('.')[0] + '.txt')
             with open(filepath, "r", encoding='utf-8', errors='ignore') as input_file:
                 with open(_filtered_path, "a", encoding='utf-8', errors='ignore') as output_file:
                     for line in input_file.read().splitlines():
