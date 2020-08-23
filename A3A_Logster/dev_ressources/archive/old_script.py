@@ -1,38 +1,3 @@
-from ftplib import FTP
-import pathlib
-import os
-
-
-USERNAME = "{{ user_name }}"
-PASSWORD = "{{ password }}"
-TARGET_SERVER = "{{ target_server }}"
-LOCAL_LOG_DIR = pathlib.Path("SOMEPATH")
-LOCAL_FILTERED_LOGS_DIR = pathlib.Path("SOMEPATH")
-
-
-def get_filters():
-    """
-    gets a list of strings to filter the logs with.
-    from the file 'filter_list.txt' inside the current folder
-    each line is a different filter string.
-    """
-    with open('{{ filter_list_path }}', 'r') as filter_file:
-        _out = filter_file.read().splitlines()
-    return _out
-
-def filter_file(inputPathObj, outputPathObj):
-    """
-    filters out all lines that contain a string from the filter_list.txt file
-    """
-    with inputPathObj.open("r", encoding='utf-8', errors='ignore') as input_file:
-        with outputPathObj.open("w", encoding='utf-8', errors='ignore') as output_file:
-            new_f = input_file.readlines()
-            for line in new_f:
-                if all(filter not in line for filter in get_filters()):
-                    output_file.write(line)
-            output_file.truncate()
-
-
 download_single_server = TARGET_SERVER != ""
 
 ftp = FTP()
@@ -50,7 +15,6 @@ for server in servers:
     rptDir = LOCAL_LOG_DIR.joinpath('{{ folder }}')
     rptDir.mkdir(parents=True, exist_ok=True)
     print(str(rptDir) + ' save location for full logs')
-
 
     filteredRptDir = LOCAL_FILTERED_LOGS_DIR.joinpath('{{ filtered_folders }}')
     filteredRptDir.mkdir(parents=True, exist_ok=True)
