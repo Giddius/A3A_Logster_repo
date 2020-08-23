@@ -2,7 +2,7 @@
 
 import os
 import sys
-from ftplib import FTP
+from ftplib import Error, FTP
 
 from a3a_logster_classes import LogsterConfigParser, log_folderer, main_logger
 
@@ -106,12 +106,20 @@ class LogDownloader:
     def filter_logs(self):
         pylog.info('Class: %s, Name: %s -- starting process of filtering new logs', self.__class__, self.name)
         for filename, filepath in self.new_logs:
-            _filtered_path = os.path.join(self.filtered_log_folder, filename)
+            _filtered_path = os.path.join(self.filtered_log_folder, filename.split('.')[0] + '.txt')
+            _content_list = []
             with open(filepath, "r", encoding='utf-8', errors='ignore') as input_file:
-                with open(_filtered_path, "a", encoding='utf-8', errors='ignore') as output_file:
-                    for line in input_file.read().splitlines():
-                        if all(filter not in line for filter in self.cfg_holder.filters):
-                            output_file.write(line + '\n')
+                for line in input_file.read().splitlines():
+                    if all(filter not in line for filter in self.cfg_holder.filters):
+                        _content_list.append(line)
+            with open(_filtered_path, "w", encoding='utf-8', errors='ignore') as output_file:
+                output_file.write('\n'.join(_content_list))
+        for files in os.listdir(self.filtered_log_folder):
+            if files.endswith('.rpt'):
+                try:
+                    os.rename(os.path.join(self.filtered_log_folder, files), os.path.join(self.filtered_log_folder, files.split('.')[0] + '.txt'))
+                except Error as e:
+                    pylog.critical('could not rename file %s, because: %s', os.path.join(self.filtered_log_folder, files), e)
 
 
 class LogDownloadFactory:
