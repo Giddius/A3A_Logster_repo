@@ -1,0 +1,50 @@
+[main_1_server]
+target_server| antistasi.armahosts.com_2302
+ftp_cwd| ARMAHOSTS
+folder_name| Mainserver_1/Server
+
+# ---------------------------------------------------------------------------------------------- #
+
+[main_1_hc]
+target_server| antistasi.armahosts.com_2302
+ftp_cwd| HC0_1112
+folder_name| Mainserver_1/HC_0
+
+# ---------------------------------------------------------------------------------------------- #
+
+[main_2_server]
+target_server| antistasi.armahosts.com_2322
+ftp_cwd| ARMAHOSTS
+folder_name| Mainserver_2/Server
+
+# ---------------------------------------------------------------------------------------------- #
+
+[main_2_hc]
+target_server| antistasi.armahosts.com_2322
+ftp_cwd| HC0_1188
+folder_name| Mainserver_2/HC_0
+
+# ---------------------------------------------------------------------------------------------- #
+
+[event_server]
+target_server| antistasi.armahosts.com_2332
+ftp_cwd| ARMAHOSTS
+folder_name| Eventserver/Server
+
+# ---------------------------------------------------------------------------------------------- #
+
+[test_1_server]
+target_server| antistasi.armahosts.com_2342
+ftp_cwd| ARMAHOSTS
+folder_name| Testserver_1/Server
+
+# ---------------------------------------------------------------------------------------------- #
+
+[test_1_hc]
+target_server| antistasi.armahosts.com_2342
+ftp_cwd| HC0_1701
+folder_name| Testserver_1/HC_0
+
+# ---------------------------------------------------------------------------------------------- #
+
+server_list| main_1_server, main_1_hc, main_2_server, main_2_hc, event_server, test_1_server, test_1_hc
