@@ -40,7 +40,7 @@ def file_walker(in_path):
 
 for files in file_walker(_cwd):
 
-    if 'Antistasi_Community_Logs'.lower() in files.lower() and os.path.splitext(files)[1] == '.rpt':
+    if 'Antistasi_Community_Logs'.lower() in files.lower() and files.endswith('.rpt'):
         if os.path.exists(files + '.txt') is True:
             os.remove(files + '.txt')
             print(f"deleted and overwriting [{files}]")

@@ -134,3 +134,5 @@ dmypy.json
 #script folder
 scripts/
 
+*.dat
+dev_ressources/

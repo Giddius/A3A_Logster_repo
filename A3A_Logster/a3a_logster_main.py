@@ -1,87 +1,182 @@
+# region [Imports]
+
 import os
-import jinja2
-from jinja2 import Environment
-# needs to be installed!
-# import stdiomask
+import sys
+from ftplib import FTP
+
+from a3a_logster_classes import LogsterConfigParser, log_folderer, main_logger
+
+# endregion [Imports]
+
+# region [Logging]
+
+pylog = main_logger(log_folderer(__name__, in_main_log_folder='python_script_logs', in_old_log_subfolder='old_python_script_logs'), 'info', 5)
+pylog.info("# " + "*-$-" * 6 + "* --> NEW_RUN <-- " + "*-?-" * 6 + "* #")
+
+# endregion [Logging]
+
+# region [Paths]
+
+CWD_PATH = os.getcwd()
+CFG_PATH = os.path.join(CWD_PATH, 'a3a_logster_config.ini')
+
+# endregion [Paths]
+
+# region [Constants]
 
 
-_cwd = os.getcwd()
+# endregion [Constants]
+
+# region [Global_Functions]
+
+def create_folders(in_folder):
+    if os.path.isdir(in_folder) is False:
+        pylog.debug('Folder %s does not exist, creating it now', in_folder)
+        os.makedirs(in_folder)
+        pylog.info('Folder %s was created', in_folder)
+    else:
+        pylog.debug('Folder %s already existing, does not need to be created', in_folder)
 
 
-# def get_username_password():
-#     """
-#     gets username and password from user input,
-#     password is obscured by '*' via the stdiomask module
-#     Returns a tuple where [0] = user_name and [1] is password
-#     """
-#     user_name = input("Please enter your Username: ")
-#     password = stdiomask.getpass("Please enter your Password: ")
-#     return (user_name, password)
+def create_folders_from_list(in_list):
+    for folder in in_list:
+        pylog.debug('folder input list: %s', ', '.join(in_list))
+        create_folders(folder)
+
+# endregion [Global_Functions]
+
+# region [Factories]
 
 
-def get_template(in_template='logster_script_template.py.jinja'):
-    """
-    gets the template as string from a file,
-    filename can be specified but also defaults if not specified
-    Returns the template object
-    """
-    with open(os.path.join(_cwd, in_template), 'r') as jinfile:
-        _template_string = jinfile.read()
-    return Environment(loader=jinja2.BaseLoader).from_string(_template_string)
+class LogDownloader:
+    def __init__(self, name, cfg_holder, ftp_object):
+        pylog.info('starting initiation of %s instance with the name: %s', self.__class__, name)
+        self.name = name
+        self.cfg_holder = cfg_holder
+        self.ftpcon = ftp_object
+        self.new_logs = []
+        self.log_folder, self.filtered_log_folder = self.create_folder()
+        pylog.info('initiation of %s instance with name: %s completed', self.__class__, name)
+        self.download_logs()
+
+    def create_folder(self):
+        pylog.debug('Class: %s, Name: %s -- starting process of checking and creating folders', self.__class__, name)
+        _main_folder = self.cfg_holder.folder_dict.get('main_save_path')
+        _server_folder = os.path.join(_main_folder, self.cfg_holder.get(self.name, 'folder_name'))
+        _log_folder = os.path.join(_server_folder, self.cfg_holder.folder_dict.get('unfiltered_folder_name'))
+        _filtered_log_folder = os.path.join(_server_folder, self.cfg_holder.folder_dict.get('filtered_folder_name'))
+        create_folders_from_list([_main_folder, _server_folder, _log_folder, _filtered_log_folder])
+        return (_log_folder, _filtered_log_folder)
+
+    @property
+    def local_logs(self):
+        _out = {}
+        for filename in os.listdir(self.log_folder):
+            if filename.endswith('.rpt'):
+                _out[filename] = os.stat(os.path.join(self.log_folder, filename)).st_size
+        pylog.debug('%s local logs were found in %s', len(_out), self.log_folder)
+        return _out
+
+    @property
+    def remote_logs(self):
+        _out = {}
+        for filename in self.ftpcon.nlst():
+            if filename.endswith('.rpt'):
+                _out[filename] = self.ftpcon.size(filename)
+        pylog.debug('%s remote logs were found in %s', len(_out), f"/{self.cfg_holder.get(self.name, 'target_server')}/{self.cfg_holder.get(self.name, 'ftp_cwd')}")
+        return _out
+
+    def download_logs(self):
+        self.ftpcon.cwd(f"/{self.cfg_holder.get(self.name, 'target_server')}/{self.cfg_holder.get(self.name, 'ftp_cwd')}")
+        pylog.debug('changed ftp cwd to: %s', f"/{self.cfg_holder.get(self.name, 'target_server')}/{self.cfg_holder.get(self.name, 'ftp_cwd')}")
+        pylog.info('Class: %s, Name: %s -- starting process of donwloading new logs', self.__class__, self.name)
+        _local_logs = self.local_logs
+        _remote_logs = self.remote_logs
+        for filename in _remote_logs:
+            if filename not in _local_logs or _remote_logs[filename] != _remote_logs[filename]:
+                self._log_downloader(filename)
+        pylog.debug('%s new logs downloaded', len(self.new_logs))
+
+    def _log_downloader(self, filename):
+        _download_path = os.path.join(self.log_folder, filename)
+        with open(_download_path, 'wb') as remfile:
+            self.ftpcon.retrbinary(f"RETR {remfile}", remfile.write)
+        self.new_logs.append((filename, _download_path))
+
+    def filter_logs(self):
+        pylog.info('Class: %s, Name: %s -- starting process of filtering new logs', self.__class__, self.name)
+        for filename, filepath in self.new_logs:
+            _filtered_path = os.path.join(self.filtered_log_folder, filename)
+            with open(filepath, "r", encoding='utf-8', errors='ignore') as input_file:
+                with open(_filtered_path, "a", encoding='utf-8', errors='ignore') as output_file:
+                    for line in input_file.read().splitlines():
+                        if all(filter not in line for filter in self.cfg_holder.filters):
+                            output_file.write(line + '\n')
 
 
-def get_vars(in_file):
-    """
-    reads a csv in and splits it into a list of dictionaries.
-    name of the csv is the 'in_file' argument and the file has to be in the same folder as the script
-    """
-    var_list = []
-    with open(os.path.join(_cwd, in_file), 'r') as csvfile:
-        _csv_list = csvfile.read().splitlines()
+class LogDownloadFactory:
+    CFG_PATH = CWD_PATH.joinpath('config', 'a3a_logster_config.ini')
+    cfg_holder = LogsterConfigParser(cwd_path=CWD_PATH, config_file=CFG_PATH, auto_read=True, delimiters='|', allow_no_value=True)
 
-    for index, line in enumerate(_csv_list):
-        if index != 0 and line != '':
-            _var_dict = {}
-            Server, Category, TARGET_SERVER, Folder, Full_log, Filtered_Log = line.split(';')
-            _var_dict['target_server'] = TARGET_SERVER.strip()
-            _var_dict['ftp_var'] = Folder.strip()
-            _var_dict['server'] = Server.strip().replace(' ', '_')
-            _var_dict['category'] = Category.strip().replace(' ', '')
-            _var_dict['folder'] = Full_log.replace('\\', ' /').replace(' ', '_')
-            _var_dict['filtered_folders'] = Filtered_Log.replace('\\', '/').strip().replace(' ', '_')
+    def __init__(self, filter_files=True):
+        pylog.info('starting initiation of %s instance', self.__class__)
+        self.ftp = FTP()
+        self.ftp_status = 'closed'
+        self.downloaders = {}
+        self.filter_files = filter_files
 
-            var_list.append(_var_dict)
-    return var_list
+    def open_connection(self):
+        if self.ftp_status != 'open' and self.ftp_status != 'quited':
+            pylog.info('opening ftp connection')
+            self.ftp.connect(**self.cfg_holder.connect_dict)
+            self.ftp.login(**self.cfg_holder.login_dict)
+            _welcome = self.ftp.getwelcome()
+            print(_welcome)
+            pylog.info('ftp connection established\n\n%s', _welcome)
+            self.ftp_status = 'open'
+        elif self.ftp_status == 'open':
+            pylog.warning('connection is already open!')
+        elif self.ftp_status == 'quited':
+            pylog.critical('connection was already closed prior, cannot be reopen in this script run')
 
+    def create_all(self, exclude=None):
+        _exclude = [] if exclude is None else exclude
+        if self.ftp_status == 'closed':
+            self.open_connection()
+        if self.ftp_status == 'open':
+            for server in self.cfg_holder.server_set:
+                if server not in _exclude and server not in self.downloaders:
+                    self.downloaders[server] = LogDownloader(server, self.cfg_holder, self.ftp)
+            self.ftp.quit()
+            self.ftp_status = 'quited'
+        if self.filter_files is True:
+            self.filter_all()
 
-def render_scripts(in_username, in_password, in_filter_file, in_variable_dict, in_template, in_target_folder='scripts'):
-    """
-    creates the scripts with jinja, creates the 'in_target_folder(default='scripts')' if it does not already exists.
-    the scripts name is built from the variables.
-    """
-    data = in_template.render(user_name=in_username, password=in_password, filter_list_path=in_filter_file, **in_variable_dict)
-    folder = os.path.join(_cwd, in_target_folder)
-    script_name = f"{in_variable_dict['server']}_{in_variable_dict['category']}_script.py"
-    if os.path.exists(folder) is False:
-        os.mkdir(folder)
-    with open(os.path.join(folder, script_name), 'w') as scriptfile:
-        scriptfile.write(data)
+    def filter_all(self):
+        for _, value in self.downloaders.items():
+            value.filter_logs()
 
-
-def main():
-    # get username and password
-    # if you don't want to have to manually input your password, then comment out the original line(76) and the import line(5) and comment in the following line(75):
-
-    username, password = ('YOURUSERNAME', 'YOURPASSWORD')
-    # username, password = get_username_password()
-    # get the template from the template file
-    template = get_template()
-    filter_list_path = ''
-    # loop through the list of variable dictionaries from the csv
-    # and create the scripts
-    for var_group in get_vars('Mappe1.csv'):
-        render_scripts(username, password, filter_list_path, var_group, template)
+# endregion [Factories]
 
 
-# execute the main function
-main()
+def main(filter_logs: bool, excluded):
+    log_getter = LogDownloadFactory(filter_files=filter_logs)
+    log_getter.create_all(exclude=excluded)
+    print('All Processes completed!')
+
+
+# region [Main_Exec]
+if __name__ == '__main__':
+    FILTER_FILES = True if sys.argv[1] == '-f' else False
+    if len(sys.argv) > 2:
+        EXCLUDED_LIST = [
+            excluded for index, excluded in sys.argv if index not in [1, 2]
+        ]
+
+    else:
+        EXCLUDED_LIST = None
+    pylog.info('Filter_files was detected as %s, Exclude List as: %s', FILTER_FILES, ', '.join(EXCLUDED_LIST))
+    main(FILTER_FILES, EXCLUDED_LIST)
+
+
+# endregion [Main_Exec]

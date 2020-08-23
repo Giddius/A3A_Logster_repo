@@ -1,5 +1,37 @@
 import configparser
 import os
+import logging
+from logging import handlers
+
+
+def log_folderer(in_log_file_name, in_main_log_folder='logs', in_old_log_subfolder='old_logs'):
+    _cwd = os.getcwd()
+    _path_to_old_folder = f"{_cwd}/{in_main_log_folder}/{in_old_log_subfolder}"
+    if os.path.exists(_path_to_old_folder) is False:
+        os.makedirs(_path_to_old_folder)
+    return f"{_cwd}/{in_main_log_folder}/{in_log_file_name}.log"
+
+
+def std_namer(name):
+    _nameparts = name.split('.')
+    _path, _basename = _nameparts[0].rsplit('\\', 1)
+    return f'{_path}/old_logs/{_basename}_{_nameparts[2]}.{_nameparts[1]}'
+
+
+def main_logger(in_file_name, in_level, in_back_up=2):
+
+    _out = logging.getLogger('main')
+    _out.setLevel(getattr(logging, in_level.upper()))
+    formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(lineno)s : %(funcName)s : %(message)s')
+    should_roll_over = os.path.isfile(in_file_name)
+    handler = handlers.RotatingFileHandler(in_file_name, mode='a', backupCount=in_back_up)
+    handler.namer = std_namer
+    if should_roll_over:
+        handler.doRollover()
+    handler.setFormatter(formatter)
+    _out.addHandler(handler)
+
+    return _out
 
 
 class LogsterConfigParser(configparser.ConfigParser):
