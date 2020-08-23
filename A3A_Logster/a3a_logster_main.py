@@ -2,21 +2,21 @@ import os
 import jinja2
 from jinja2 import Environment
 # needs to be installed!
-import stdiomask
+# import stdiomask
 
 
 _cwd = os.getcwd()
 
 
-def get_username_password():
-    """
-    gets username and password from user input,
-    password is obscured by '*' via the stdiomask module
-    Returns a tuple where [0] = user_name and [1] is password
-    """
-    user_name = input("Please enter your Username: ")
-    password = stdiomask.getpass("Please enter your Password: ")
-    return (user_name, password)
+# def get_username_password():
+#     """
+#     gets username and password from user input,
+#     password is obscured by '*' via the stdiomask module
+#     Returns a tuple where [0] = user_name and [1] is password
+#     """
+#     user_name = input("Please enter your Username: ")
+#     password = stdiomask.getpass("Please enter your Password: ")
+#     return (user_name, password)
 
 
 def get_template(in_template='logster_script_template.py.jinja'):
@@ -37,29 +37,29 @@ def get_vars(in_file):
     """
     var_list = []
     with open(os.path.join(_cwd, in_file), 'r') as csvfile:
-        _csv_list = csvfile.read().splitlines(False)
+        _csv_list = csvfile.read().splitlines()
 
     for index, line in enumerate(_csv_list):
-        if index != 0:
+        if index != 0 and line != '':
             _var_dict = {}
             Server, Category, TARGET_SERVER, Folder, Full_log, Filtered_Log = line.split(';')
             _var_dict['target_server'] = TARGET_SERVER.strip()
             _var_dict['ftp_var'] = Folder.strip()
             _var_dict['server'] = Server.strip().replace(' ', '_')
             _var_dict['category'] = Category.strip().replace(' ', '')
-            _var_dict['folder'] = Full_log.replace('\\', ' /').strip().replace(' ', '_')
-            _var_dict['filtered_folder'] = Filtered_Log.replace('\\', '/').strip().replace(' ', '_')
+            _var_dict['folder'] = Full_log.replace('\\', ' /').replace(' ', '_')
+            _var_dict['filtered_folders'] = Filtered_Log.replace('\\', '/').strip().replace(' ', '_')
 
             var_list.append(_var_dict)
     return var_list
 
 
-def render_scripts(in_username, in_password, in_variable_dict, in_template, in_target_folder='scripts'):
+def render_scripts(in_username, in_password, in_filter_file, in_variable_dict, in_template, in_target_folder='scripts'):
     """
     creates the scripts with jinja, creates the 'in_target_folder(default='scripts')' if it does not already exists.
     the scripts name is built from the variables.
     """
-    data = in_template.render(user_name=in_username, password=in_password, **in_variable_dict)
+    data = in_template.render(user_name=in_username, password=in_password, filter_list_path=in_filter_file, **in_variable_dict)
     folder = os.path.join(_cwd, in_target_folder)
     script_name = f"{in_variable_dict['server']}_{in_variable_dict['category']}_script.py"
     if os.path.exists(folder) is False:
@@ -70,16 +70,17 @@ def render_scripts(in_username, in_password, in_variable_dict, in_template, in_t
 
 def main():
     # get username and password
-    # if you don't want to have to manually input your password, then comment out the original line and comment in the following line:
+    # if you don't want to have to manually input your password, then comment out the original line(76) and the import line(5) and comment in the following line(75):
 
-    # username, password = (YOURUSERNAME, YOURPASSWORD)
-    username, password = get_username_password()
+    username, password = ('YOURUSERNAME', 'YOURPASSWORD')
+    # username, password = get_username_password()
     # get the template from the template file
     template = get_template()
+    filter_list_path = ''
     # loop through the list of variable dictionaries from the csv
     # and create the scripts
     for var_group in get_vars('Mappe1.csv'):
-        render_scripts(username, password, var_group, template)
+        render_scripts(username, password, filter_list_path, var_group, template)
 
 
 # execute the main function

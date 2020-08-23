@@ -129,3 +129,7 @@ dmypy.json
 
 # csv file
 *.csv
+
+
+#script folder
+scripts/
