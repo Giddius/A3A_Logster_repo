@@ -175,16 +175,20 @@ def main(filter_logs: bool, excluded):
 
 # region [Main_Exec]
 if __name__ == '__main__':
-    FILTER_FILES = False if len(sys.argv) > 1 and sys.argv[1] == '-nf' else True
-    if len(sys.argv) > 2:
-        EXCLUDED_LIST = [
-            excluded for index, excluded in sys.argv if index not in [1, 2]
-        ]
+    try:
+        FILTER_FILES = False if len(sys.argv) > 1 and sys.argv[1] == '-nf' else True
+        if len(sys.argv) > 2:
+            EXCLUDED_LIST = [
+                excluded for index, excluded in sys.argv if index not in [1, 2]
+            ]
 
-    else:
-        EXCLUDED_LIST = None
-    pylog.info('Filter_files was detected as %s, Exclude List as: %s', FILTER_FILES, str((EXCLUDED_LIST)))
-    main(FILTER_FILES, EXCLUDED_LIST)
+        else:
+            EXCLUDED_LIST = None
+        pylog.info('Filter_files was detected as %s, Exclude List as: %s', FILTER_FILES, str((EXCLUDED_LIST)))
+        main(FILTER_FILES, EXCLUDED_LIST)
+    except:
+        pylog.exception(sys.exc_info()[0])
+        raise
 
 
 # endregion [Main_Exec]
