@@ -10,7 +10,7 @@ from a3a_logster_classes import LogsterConfigParser, log_folderer, main_logger
 
 # region [Logging]
 
-pylog = main_logger(log_folderer(__name__, in_main_log_folder='python_script_logs', in_old_log_subfolder='old_python_script_logs'), 'info', 5)
+pylog = main_logger(log_folderer('a3a_logster_log', in_main_log_folder='python_script_logs', in_old_log_subfolder='old_python_script_logs'), 'info', 5)
 pylog.info("# " + "*-$-" * 6 + "* --> NEW_RUN <-- " + "*-?-" * 6 + "* #")
 
 # endregion [Logging]
@@ -60,7 +60,7 @@ class LogDownloader:
         self.download_logs()
 
     def create_folder(self):
-        pylog.debug('Class: %s, Name: %s -- starting process of checking and creating folders', self.__class__, name)
+        pylog.debug('Class: %s, Name: %s -- starting process of checking and creating folders', self.__class__, self.name)
         _main_folder = self.cfg_holder.folder_dict.get('main_save_path')
         _server_folder = os.path.join(_main_folder, self.cfg_holder.get(self.name, 'folder_name'))
         _log_folder = os.path.join(_server_folder, self.cfg_holder.folder_dict.get('unfiltered_folder_name'))
@@ -123,7 +123,7 @@ class LogDownloader:
 
 
 class LogDownloadFactory:
-    CFG_PATH = CWD_PATH.joinpath('config', 'a3a_logster_config.ini')
+    CFG_PATH = os.path.join(CWD_PATH, 'a3a_logster_config.ini')
     cfg_holder = LogsterConfigParser(cwd_path=CWD_PATH, config_file=CFG_PATH, auto_read=True, delimiters='|', allow_no_value=True)
 
     def __init__(self, filter_files=True):
@@ -175,7 +175,7 @@ def main(filter_logs: bool, excluded):
 
 # region [Main_Exec]
 if __name__ == '__main__':
-    FILTER_FILES = True if sys.argv[1] == '-f' else False
+    FILTER_FILES = False if len(sys.argv) > 1 and sys.argv[1] == '-nf' else True
     if len(sys.argv) > 2:
         EXCLUDED_LIST = [
             excluded for index, excluded in sys.argv if index not in [1, 2]
@@ -183,7 +183,7 @@ if __name__ == '__main__':
 
     else:
         EXCLUDED_LIST = None
-    pylog.info('Filter_files was detected as %s, Exclude List as: %s', FILTER_FILES, ', '.join(EXCLUDED_LIST))
+    pylog.info('Filter_files was detected as %s, Exclude List as: %s', FILTER_FILES, str((EXCLUDED_LIST)))
     main(FILTER_FILES, EXCLUDED_LIST)
 
 
