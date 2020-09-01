@@ -110,16 +110,18 @@ class LogDownloader:
             _content_list = []
             with open(filepath, "r", encoding='utf-8', errors='ignore') as input_file:
                 for line in input_file.read().splitlines():
-                    if all(filter not in line for filter in self.cfg_holder.filters):
+                    if all(_filter not in line for _filter in self.cfg_holder.filters):
                         _content_list.append(line)
             with open(_filtered_path, "w", encoding='utf-8', errors='ignore') as output_file:
                 output_file.write('\n'.join(_content_list))
-        for files in os.listdir(self.filtered_log_folder):
-            if files.endswith('.rpt'):
-                try:
-                    os.rename(os.path.join(self.filtered_log_folder, files), os.path.join(self.filtered_log_folder, files.split('.')[0] + '.txt'))
-                except Error as e:
-                    pylog.critical('could not rename file %s, because: %s', os.path.join(self.filtered_log_folder, files), e)
+        # for files in os.listdir(self.filtered_log_folder):
+        #     if files.endswith('.rpt'):
+        #         try:
+        #             os.rename(os.path.join(self.filtered_log_folder, files), os.path.join(self.filtered_log_folder, files.split('.')[0] + '.txt'))
+        #         except Error as e:
+        #             pylog.critical('could not rename file %s, because: %s', os.path.join(self.filtered_log_folder, files), e)
+
+        # ! Uncommenting this will enable changing also the already downloaded rpt to txt
 
 
 class LogDownloadFactory:
